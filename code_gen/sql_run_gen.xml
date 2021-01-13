@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="sql_run_gen.xsl"?>
+
+<sql_runs>
+    <out_dir>generated/sql_run</out_dir>
+    <sql_run>
+        <drive_code desc="find temporary segment usage of PDB under CDB">temp_segment_usage.sh</drive_code>
+        <pars min="1" pdb_position="2">
+            <par type='CDB_source'>CDB</par>
+            <par type='PDB_optional'>PDB</par>
+        </pars>
+        <sql_code>temp_segment_usage.sql</sql_code>
+        <sets>
+            <date_format></date_format>
+        </sets>
+    </sql_run>
+</sql_runs>

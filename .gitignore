@@ -1,4 +1,7 @@
 # Prerequisites
+*.tmp
+
+# Prerequisites
 *.d
 
 # Object files
