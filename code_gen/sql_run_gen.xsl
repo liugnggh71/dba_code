@@ -82,6 +82,8 @@
         
         <xsl:text>sqlplus / as sysdba &lt;&lt; EOF</xsl:text>
         <xsl:value-of select="$new_line"/>
+        <xsl:text>alter session set nls_date_format = 'YYYY-MM-DD HH24:MI:SS';</xsl:text>
+        <xsl:value-of select="$new_line"/>
         <xsl:text>alter session set container=${PDB};</xsl:text>
         <xsl:value-of select="$new_line"/>
         <xsl:text>@</xsl:text>

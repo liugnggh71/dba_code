@@ -4,6 +4,14 @@
 <sql_runs>
     <out_dir>generated/sql_run</out_dir>
     <sql_run>
+        <drive_code desc="Turn Off non-sys jobs PDB under CDB">off_non_sys_jobs.sh</drive_code>
+        <pars min="1" pdb_position="2">
+            <par type='CDB_source'>CDB</par>
+            <par type='PDB_optional'>PDB</par>
+        </pars>
+        <sql_code>off_non_sys_jobs.sql</sql_code>
+    </sql_run>
+    <sql_run>
         <drive_code desc="find scheduler jobs of PDB under CDB">non_sys_jobs.sh</drive_code>
         <pars min="1" pdb_position="2">
             <par type='CDB_source'>CDB</par>
