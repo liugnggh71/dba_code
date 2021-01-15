@@ -10,6 +10,9 @@
             <par type='PDB_optional'>PDB</par>
         </pars>
         <sql_code>off_non_sys_jobs.sql</sql_code>
+        <sql_run_option>
+            <spool prefix="cdb_pdb" suffix="date" gen_shell_env="source_cdb_point_pdb">off_non_sys_jobs.sh.</spool>
+        </sql_run_option>
     </sql_run>
     <sql_run>
         <drive_code desc="find scheduler jobs of PDB under CDB">non_sys_jobs.sh</drive_code>
