@@ -1,0 +1,9 @@
+show homes
+set home diag/rdbms/dsrtest/dsrtest
+show problem -all
+show incident -all
+
+ips pack problem 8 in /tmp/1
+ips pack incident 17161 in /tmp/1
+ips pack time '2020-04-29 23:25:41.492000 -05:00' to '2020-05-01 09:53:25.811000 -05:00'  in /tmp/1;
+
