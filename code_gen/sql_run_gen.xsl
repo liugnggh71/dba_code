@@ -25,6 +25,9 @@ set trimspool on
 . ${HOME}/${CDB}.env
 sqlplus / as sysdba << EOF
 alter session set container=${PDB};
+host hostname
+DEFINE _CONNECT_IDENTIFIER
+show pdbs
 EOC
 ]]></xsl:variable>
     

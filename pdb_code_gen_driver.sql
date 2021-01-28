@@ -10,7 +10,7 @@ set pagesize 50000
 set termout off
 set trimspool on
 
-spool &2
+spool &2 append
 @&3
 spool off
 exit
