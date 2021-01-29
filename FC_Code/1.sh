@@ -1,0 +1,25 @@
+./download_code.sh ./TFA/1hr.sh
+./download_code.sh ./TFA/2_time_collect.sh
+./download_code.sh ./TFA/600.sh
+./download_code.sh ./TFA/700.sh
+./download_code.sh ./TFA/7445.sh
+./download_code.sh ./TFA/actions.sh
+./download_code.sh ./TFA/alias.sh
+./download_code.sh ./TFA/Binary
+./download_code.sh ./TFA/config.sh
+./download_code.sh ./TFA/directory.sh
+./download_code.sh ./TFA/EXACHK
+./download_code.sh ./TFA/full_install_host1.txt
+./download_code.sh ./TFA/full_install_host2.txt
+./download_code.sh ./TFA/full_install_response.txt
+./download_code.sh ./TFA/INSTALL.SH
+./download_code.sh ./TFA/ls_repo.sh
+./download_code.sh ./TFA/perf.sh
+./download_code.sh ./TFA/restart.sh
+./download_code.sh ./TFA/space.sh
+./download_code.sh ./TFA/start.sh
+./download_code.sh ./TFA/status.sh
+./download_code.sh ./TFA/stop.sh
+./download_code.sh ./TFA/unalias.sh
+./download_code.sh ./TFA/UNINSTALL.SH
+
