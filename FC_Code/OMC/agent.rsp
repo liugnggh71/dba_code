@@ -1,0 +1,94 @@
+####################################################################################################
+# Refer Agent Installation Guide for details                                                       #
+#  http://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/management-cloud&id=deploy_agent       #
+# Refer this link for mandatory and non-mandatory parameter details                                #
+#  http://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/management-cloud&id=deploy_gateway     #
+####################################################################################################
+
+###################################### Registration Parameters #####################################
+
+TENANT_NAME=779cd7945fb34cbb8ace488a64c4024c
+
+AGENT_REGISTRATION_KEY=RlY48v0maT1hYK-hejhlmTxG9h
+
+AGENT_BASE_DIRECTORY=/omc/agent
+
+######## Communication Parameters ####
+
+OMC_URL=https://779cd7945fb34cbb8ace488a64c4024c.uscom-east-1.oraclecloud.com/
+
+GATEWAY_HOST=bswocmcagtq01.bswoci.bswroot.pvt
+
+GATEWAY_PORT=4459
+
+ADDITIONAL_GATEWAYS=https://bswocmcagtq02.bswoci.bswroot.pvt:4459
+
+#################################### Proxy Parameters (Optional) ###################################
+
+OMC_PROXYHOST=
+
+OMC_PROXYPORT=
+
+OMC_PROXYUSER=
+
+OMC_PROXYPWD=
+
+OMC_PROXYREALM=
+
+##################################### Other Optional Parameters ####################################
+
+AGENT_PORT=
+
+ORACLE_HOSTNAME=
+
+REINSTALL=
+
+IGNORE_VALIDATIONS=
+
+IGNORE_ULIMIT_CHECK=
+
+DISPLAY_NAME=
+
+AGENT_HOST_DISPLAY_NAME=
+
+#################################### Data Collector Parameters #####################################
+# Refer this link for Data Collector parameters                                                    #
+#  http://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/management-cloud&id=deploy_dc_mandatory#
+
+DATA_COLLECTOR_USERNAME=
+
+DATA_COLLECTOR_USER_PASSWORD=
+
+OMR_USERNAME=  
+                  
+OMR_USER_PASSWORD=
+
+OMR_HOST_USERNAME=  
+
+OMR_STAGE_DIR=
+
+OMR_HOST_USER_PASSWORD=
+
+OMR_HOST_USER_SSH_KEY=
+
+OMR_CONNECT_STRING=
+
+OMR_HOSTNAME=
+
+OMR_PORT=
+
+OMR_SID=
+
+OMR_SERVICE_NAME=
+
+################################## Optional Data Collector Parameters ##################################
+# Refer this link for Data Collector parameters                                                        #
+#  http://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/management-cloud&id=deploy_dc_non_mandatory#
+
+OMR_USER_ROLE=
+
+OMR_HOST_SSH_PORT=
+
+NAMESPACE=
+
+IGNORE_DATA_COLLECTOR_VALIDATIONS=

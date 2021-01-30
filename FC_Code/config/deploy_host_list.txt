@@ -1,0 +1,7 @@
+autp-hroradb-utzrk1.hlthedgeexa.pvthlthedgeprod.oraclevcn.com~10.21.32.105
+autp-hroradb-utzrk2.hlthedgeexa.pvthlthedgeprod.oraclevcn.com~10.21.32.106
+aupp-hroradb-f9exx1.hlthedgexap.pvthlthedgeprod.oraclevcn.com~10.21.32.2
+aupp-hroradb-f9exx2.hlthedgexap.pvthlthedgeprod.oraclevcn.com~10.21.32.3
+aupp-hroradb-bfcfz1.hlthedgexap.pvthlthedgedr.oraclevcn.com~10.21.137.2
+aupp-hroradb-bfcfz2.hlthedgexap.pvthlthedgedr.oraclevcn.com~10.21.137.3
+
