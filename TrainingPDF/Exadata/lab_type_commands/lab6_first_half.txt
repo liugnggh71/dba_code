@@ -1,0 +1,431 @@
+Lab 6-1 email configuration
+
+list cell detail
+
+alter cell smtpServer='my_mail.example.com', -
+           smtpFromAddr='john.doe@example.com', -
+           smtpFrom='John Doe', -
+           smtpToAddr='jane.smith@xample.com', -
+           notificationPolicy='critical,warning,clear', -
+           notificationMethod='mail'
+           
+list cell detail
+
+alter cell validate mail
+
+alter cell validate configuration
+
+Lab 6-2 Storage configuration
+
+In +ASM1 environment with grid login
+
+select name, total_mb, free_mb, total_mb-free_mb used_mb 
+from v$asm_diskgroup;
+           
+col name format a15
+select dg.name, count(*), d.total_mb, d.os_mb,
+min(d.free_mb) MIN_FREE_MB, max(d.free_mb) MAX_FREE_MB
+from v$asm_disk d, v$asm_diskgroup dg
+where dg.group_number=d.group_number and d.mount_status='CACHED'
+group by dg.name, d.total_mb, d.os_mb;
+
+
+alter diskgroup reco_qr01 resize all size 608m rebalance power 1024;
+           
+select name, total_mb, free_mb, total_mb-free_mb used_mb 
+from v$asm_diskgroup;
+           
+col name format a15
+select dg.name, count(*), d.total_mb, d.os_mb,
+min(d.free_mb) MIN_FREE_MB, max(d.free_mb) MAX_FREE_MB
+from v$asm_disk d, v$asm_diskgroup dg
+where dg.group_number=d.group_number and d.mount_status='CACHED'
+group by dg.name, d.total_mb, d.os_mb;
+
+Find the allocated become smaller than OS_mb
+
+Make sure this do not return any line and ASM is idle
+
+select * from v$asm_operation;  
+
+alter diskgroup reco_qr01 
+drop disks in failgroup qr01celadm01 
+rebalance power 1024;
+ 
+select * from v$asm_operation;  
+
+To find rebalance action
+
+Find 
+
+select path, free_mb, header_status, mount_status
+from v$asm_disk
+where path like '%RECO_QR01%celadm01';
+ 
+Return 12 closed 
+
+select path, free_mb, header_status, mount_status
+from v$asm_disk;
+
+Return 108 all drives
+
+select path, free_mb, header_status, mount_status
+from v$asm_disk
+where path like '%RECO_QR%';
+ 
+Return 36 12 of them closed, and 24 of them cached on cell02 and 03
+
+Login cell host 01
+
+CellCLI> list griddisk attributes name, size, ASMModeStatus
+	 DATA_QR01_CD_00_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_01_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_02_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_03_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_04_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_05_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_06_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_07_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_08_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_09_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_10_qr01celadm01	 720M	 ONLINE
+	 DATA_QR01_CD_11_qr01celadm01	 720M	 ONLINE
+	 DBFS_DG_CD_00_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_01_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_02_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_03_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_04_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_05_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_06_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_07_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_08_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_09_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_10_qr01celadm01  	 352M	 ONLINE
+	 DBFS_DG_CD_11_qr01celadm01  	 352M	 ONLINE
+	 RECO_QR01_CD_00_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_01_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_02_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_03_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_04_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_05_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_06_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_07_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_08_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_09_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_10_qr01celadm01	 928M	 UNUSED
+	 RECO_QR01_CD_11_qr01celadm01	 928M	 UNUSED
+
+ CellCLI> drop griddisk all prefix=reco_qr01
+GridDisk RECO_QR01_CD_00_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_01_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_02_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_03_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_04_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_05_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_06_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_07_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_08_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_09_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_10_qr01celadm01 successfully dropped
+GridDisk RECO_QR01_CD_11_qr01celadm01 successfully dropped
+
+CellCLI> create griddisk all harddisk prefix=RECO_QR01, size=608M
+GridDisk RECO_QR01_CD_00_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_01_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_02_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_03_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_04_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_05_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_06_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_07_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_08_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_09_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_10_qr01celadm01 successfully created
+GridDisk RECO_QR01_CD_11_qr01celadm01 successfully created
+
+CellCLI> 
+
+
+In grid ASM window run query
+
+select path, free_mb, header_status, mount_status
+from v$asm_disk
+where path like '%RECO_QR01%celadm01';
+
+Return 12 closed candidate drive with smaller size at 608mb
+
+Add recover group the newly created griddisk
+
+alter diskgroup reco_qr01 add disk
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_00_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_01_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_02_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_03_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_04_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_05_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_06_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_07_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_08_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_09_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_10_qr01celadm01',
+'o/192.168.1.105;192.168.1.106/RECO_QR01_CD_11_qr01celadm01'
+drop disks in failgroup qr01celadm02
+rebalance power 1024;
+
+If finger is fast enough to find disk operation:
+
+select * from gv$asm_operation;
+
+
+
+
+SQL> col name format a15
+select dg.name, count(*), d.total_mb, d.os_mb,
+min(d.free_mb) MIN_FREE_MB, max(d.free_mb) MAX_FREE_MB
+from v$asm_disk d, v$asm_diskgroup dg
+where dg.group_number=d.group_number and d.mount_status='CACHED'
+group by dg.name, d.total_mb, d.os_mb;
+SQL>   2    3    4    5  
+
+NAME		  COUNT(*)   TOTAL_MB	   OS_MB MIN_FREE_MB MAX_FREE_MB
+--------------- ---------- ---------- ---------- ----------- -----------
+DBFS_DG 		36	  352	     352	   4	      84
+DATA_QR01		36	  720	     720	 288	     324
+RECO_QR01		12	  608	     608	 572	     592
+RECO_QR01		12	  608	     928	 580	     592
+
+SQL> SQL> 
+
+Why there are 2 lines for RECO_QR01?
+Because cell 1 is shrinked has lower 608 OS_MB, cell 3 still have 928 OS_MB
+
+cell 2 already dropped disks
+
+Change environment to Cell 2 using cellcli
+
+list griddisk attributes name, size, ASMModeStatus
+
+Return 36 drives with recover drive unused at 928MB
+
+drop griddisk all prefix=reco_qr01
+
+Above command dropped the disk on cell2
+
+create griddisk all harddisk prefix=RECO_QR01, size=608M
+
+Above command recreate harddisk RECO_QR01
+
+exit
+
+Back in grid ASM sqlasm command in sqlplus
+
+alter diskgroup reco_qr01 add disk
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_00_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_01_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_02_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_03_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_04_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_05_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_06_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_07_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_08_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_09_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_10_qr01celadm02',
+'o/192.168.1.107;192.168.1.108/RECO_QR01_CD_11_qr01celadm02'
+drop disks in failgroup qr01celadm03
+rebalance power 1024;
+
+select * from gv$asm_operation;
+
+First time above query will show rebalance action, a few times later, it is all gone.
+
+
+SQL> col name format a15
+select dg.name, count(*), d.total_mb, d.os_mb,
+min(d.free_mb) MIN_FREE_MB, max(d.free_mb) MAX_FREE_MB
+from v$asm_disk d, v$asm_diskgroup dg
+where dg.group_number=d.group_number and d.mount_status='CACHED'
+group by dg.name, d.total_mb, d.os_mb;SQL>   2    3    4    5  
+
+NAME		  COUNT(*)   TOTAL_MB	   OS_MB MIN_FREE_MB MAX_FREE_MB
+--------------- ---------- ---------- ---------- ----------- -----------
+DBFS_DG 		36	  352	     352	   4	      84
+DATA_QR01		36	  720	     720	 288	     324
+RECO_QR01		24	  608	     608	 572	     592
+
+SQL> 
+
+Change environment to Cell 3 using cellcli
+
+list griddisk attributes name, size, ASMModeStatus
+
+Return 36 drives with recover drive unused at 928MB
+
+Following command drop disk in cell3 need to run twice to get it right.
+
+drop griddisk all prefix=reco_qr01
+
+CellCLI> drop griddisk all prefix=reco_qr01
+GridDisk RECO_QR01_CD_00_qr01celadm03 successfully dropped
+GridDisk RECO_QR01_CD_01_qr01celadm03 successfully dropped
+GridDisk RECO_QR01_CD_02_qr01celadm03 successfully dropped
+GridDisk RECO_QR01_CD_03_qr01celadm03 successfully dropped
+GridDisk RECO_QR01_CD_04_qr01celadm03 successfully dropped
+
+CELL-02549: Grid disk is in use and FORCE is not specified for the operation.
+
+CellCLI> drop griddisk all prefix=reco_qr01
+GridDisk RECO_QR01_CD_05_qr01celadm03 successfully dropped
+GridDisk RECO_QR01_CD_06_qr01celadm03 successfully dropped
+GridDisk RECO_QR01_CD_07_qr01celadm03 successfully dropped
+GridDisk RECO_QR01_CD_08_qr01celadm03 successfully dropped
+GridDisk RECO_QR01_CD_09_qr01celadm03 successfully dropped
+GridDisk RECO_QR01_CD_10_qr01celadm03 successfully dropped
+GridDisk RECO_QR01_CD_11_qr01celadm03 successfully dropped
+
+CellCLI> 
+
+
+
+create griddisk all harddisk prefix=RECO_QR01, size=608M
+
+Above command recreate harddisk RECO_QR01
+
+exit
+
+Back in grid environment on db host 1
+
+alter diskgroup reco_qr01 add disk
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_00_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_01_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_02_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_03_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_04_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_05_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_06_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_07_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_08_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_09_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_10_qr01celadm03',
+'o/192.168.1.109;192.168.1.110/RECO_QR01_CD_11_qr01celadm03'
+rebalance power 1024;
+
+Above command add back disks in cell3
+
+select * from gv$asm_operation;
+
+
+SQL> SQL> select dg.name, count(*), d.total_mb, d.os_mb,
+min(d.free_mb) MIN_FREE_MB, max(d.free_mb) MAX_FREE_MB
+from v$asm_disk d, v$asm_diskgroup dg
+where dg.group_number=d.group_number and d.mount_status='CACHED'
+group by dg.name, d.total_mb, d.os_mb;  2    3    4    5  
+
+NAME		  COUNT(*)   TOTAL_MB	   OS_MB MIN_FREE_MB MAX_FREE_MB
+--------------- ---------- ---------- ---------- ----------- -----------
+DBFS_DG 		36	  352	     352	   4	      84
+DATA_QR01		36	  720	     720	 288	     324
+RECO_QR01		36	  608	     608	 560	     596
+
+SQL> 
+
+
+Go to cell 1 in cellcli
+
+list celldisk attributes name, freeSpace where freeSpace !=0
+
+Find 12 drives with about 300mb space
+
+CellCLI> list celldisk attributes name, freeSpace where freeSpace !=0
+	 CD_00_qr01celadm01	 320M
+	 CD_01_qr01celadm01	 320M
+	 CD_02_qr01celadm01	 320M
+	 CD_03_qr01celadm01	 320M
+	 CD_04_qr01celadm01	 320M
+	 CD_05_qr01celadm01	 320M
+	 CD_06_qr01celadm01	 320M
+	 CD_07_qr01celadm01	 320M
+	 CD_08_qr01celadm01	 320M
+	 CD_09_qr01celadm01	 320M
+	 CD_10_qr01celadm01	 320M
+	 CD_11_qr01celadm01	 320M
+
+CellCLI> create griddisk all harddisk prefix=DATA2_QR01
+GridDisk DATA2_QR01_CD_00_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_01_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_02_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_03_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_04_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_05_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_06_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_07_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_08_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_09_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_10_qr01celadm01 successfully created
+GridDisk DATA2_QR01_CD_11_qr01celadm01 successfully created
+
+CellCLI> list griddisk attributes name, size, ASMModeStatus where name like 'DATA2.*'
+	 DATA2_QR01_CD_00_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_01_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_02_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_03_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_04_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_05_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_06_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_07_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_08_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_09_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_10_qr01celadm01	 320M	 UNUSED
+	 DATA2_QR01_CD_11_qr01celadm01	 320M	 UNUSED
+
+CellCLI> 
+
+Copy and paste following 3 commands in 1 batch for cell2 and cell3
+
+list celldisk attributes name, freeSpace where freeSpace !=0
+create griddisk all harddisk prefix=DATA2_QR01
+list griddisk attributes name, size, ASMModeStatus where name like 'DATA2.*'
+
+
+Then use dcli to check status on all 3 cell hosts:
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e list griddisk attributes name, size, ASMModeStatus where name like \'DATA2.*\'"
+
+[celladmin@qr01celadm01 ~]$ dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e list griddisk attributes name, size, ASMModeStatus where name like \'DATA2.*\'"
+qr01celadm01: DATA2_QR01_CD_00_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_01_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_02_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_03_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_04_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_05_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_06_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_07_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_08_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_09_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_10_qr01celadm01	 320M	 UNUSED
+qr01celadm01: DATA2_QR01_CD_11_qr01celadm01	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_00_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_01_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_02_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_03_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_04_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_05_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_06_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_07_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_08_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_09_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_10_qr01celadm02	 320M	 UNUSED
+qr01celadm02: DATA2_QR01_CD_11_qr01celadm02	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_00_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_01_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_02_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_03_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_04_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_05_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_06_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_07_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_08_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_09_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_10_qr01celadm03	 320M	 UNUSED
+qr01celadm03: DATA2_QR01_CD_11_qr01celadm03	 320M	 UNUSED
+[celladmin@qr01celadm01 ~]$ 

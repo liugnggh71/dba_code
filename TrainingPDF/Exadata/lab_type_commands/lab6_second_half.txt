@@ -1,0 +1,923 @@
+Lab 6-3
+
+
+Go to grid asm sqlplus prompt and run following SQL to find 36 candidate drives created by last lab in first half
+
+select name, header_status, path from v$asm_disk
+where path like 'o/%/DATA2%'
+and header_status='CANDIDATE';
+
+see 36 candidates
+
+Then create a new diskgroup data2_qr01 using following command
+
+create diskgroup data2_qr01 normal redundancy
+disk 'o/*/DATA2_QR01*'
+attribute 'compatible.rdbms' = '12.1.0.2.0',
+'compatible.asm' = '12.1.0.2.0',
+'cell.smart_scan_capable' = 'TRUE',
+'au_size' = '4M';
+
+
+select name, header_status, path from v$asm_disk
+where path like 'o/%/DATA2%';
+
+see 36 members
+
+select d.path, dg.name GNAME, d.failgroup, d.state 
+from v$asm_disk d, v$asm_diskgroup dg
+where d.group_number = dg.group_number 
+and dg.name = 'DATA2_QR01';
+
+36 normal state drives
+
+SQL> drop diskgroup data2_qr01;
+
+Diskgroup dropped.
+
+Lab 6-4
+
+Login ASM using sqlplus with grid login
+
+show parameter unique
+
+Exit sqlplus
+
+Issue su under grid user and provide root password
+
+Run 
+
+crsctl stop cluster -all
+
+to shutdown the whole cluster.
+
+[root@qr01dbadm01 grid]# crsctl stop cluster -all
+CRS-2673: Attempting to stop 'ora.crsd' on 'qr01dbadm01'
+CRS-2790: Starting shutdown of Cluster Ready Services-managed resources on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.oc4j' on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.dbm.db' on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.LISTENER.lsnr' on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.DBFS_DG.dg' on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.LISTENER_SCAN2.lsnr' on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.cvu' on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.LISTENER_SCAN3.lsnr' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.cvu' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.crsd' on 'qr01dbadm02'
+CRS-2790: Starting shutdown of Cluster Ready Services-managed resources on 'qr01dbadm02'
+CRS-2673: Attempting to stop 'ora.DBFS_DG.dg' on 'qr01dbadm02'
+CRS-2673: Attempting to stop 'ora.dbm.db' on 'qr01dbadm02'
+CRS-2673: Attempting to stop 'ora.LISTENER.lsnr' on 'qr01dbadm02'
+CRS-2673: Attempting to stop 'ora.LISTENER_SCAN1.lsnr' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.LISTENER_SCAN1.lsnr' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.LISTENER.lsnr' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.DBFS_DG.dg' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.scan1.vip' on 'qr01dbadm02'
+CRS-2673: Attempting to stop 'ora.qr01dbadm02.vip' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.scan1.vip' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.qr01dbadm02.vip' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.dbm.db' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.RECO_QR01.dg' on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.DATA_QR01.dg' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.dbm.db' on 'qr01dbadm02' succeeded
+CRS-2673: Attempting to stop 'ora.DATA_QR01.dg' on 'qr01dbadm02'
+CRS-2673: Attempting to stop 'ora.RECO_QR01.dg' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.LISTENER_SCAN2.lsnr' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.scan2.vip' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.LISTENER_SCAN3.lsnr' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.scan3.vip' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.LISTENER.lsnr' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.qr01dbadm01.vip' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.scan2.vip' on 'qr01dbadm01' succeeded
+CRS-2677: Stop of 'ora.scan3.vip' on 'qr01dbadm01' succeeded
+CRS-2677: Stop of 'ora.qr01dbadm01.vip' on 'qr01dbadm01' succeeded
+CRS-2677: Stop of 'ora.DBFS_DG.dg' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.DATA_QR01.dg' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.RECO_QR01.dg' on 'qr01dbadm02' succeeded
+CRS-2673: Attempting to stop 'ora.asm' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.DATA_QR01.dg' on 'qr01dbadm01' succeeded
+CRS-2677: Stop of 'ora.asm' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.RECO_QR01.dg' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.asm' on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.ons' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.ons' on 'qr01dbadm02' succeeded
+CRS-2673: Attempting to stop 'ora.net1.network' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.net1.network' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.asm' on 'qr01dbadm01' succeeded
+CRS-2792: Shutdown of Cluster Ready Services-managed resources on 'qr01dbadm02' has completed
+CRS-2677: Stop of 'ora.crsd' on 'qr01dbadm02' succeeded
+CRS-2673: Attempting to stop 'ora.ctssd' on 'qr01dbadm02'
+CRS-2673: Attempting to stop 'ora.evmd' on 'qr01dbadm02'
+CRS-2673: Attempting to stop 'ora.storage' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.storage' on 'qr01dbadm02' succeeded
+CRS-2673: Attempting to stop 'ora.asm' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.ctssd' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.evmd' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.oc4j' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.ons' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.ons' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.net1.network' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.net1.network' on 'qr01dbadm01' succeeded
+CRS-2792: Shutdown of Cluster Ready Services-managed resources on 'qr01dbadm01' has completed
+CRS-2677: Stop of 'ora.crsd' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.ctssd' on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.evmd' on 'qr01dbadm01'
+CRS-2673: Attempting to stop 'ora.storage' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.storage' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.asm' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.asm' on 'qr01dbadm02' succeeded
+CRS-2673: Attempting to stop 'ora.cluster_interconnect.haip' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.ctssd' on 'qr01dbadm01' succeeded
+CRS-2677: Stop of 'ora.evmd' on 'qr01dbadm01' succeeded
+CRS-2677: Stop of 'ora.cluster_interconnect.haip' on 'qr01dbadm02' succeeded
+CRS-2673: Attempting to stop 'ora.cssd' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.cssd' on 'qr01dbadm02' succeeded
+CRS-2673: Attempting to stop 'ora.diskmon' on 'qr01dbadm02'
+CRS-2677: Stop of 'ora.diskmon' on 'qr01dbadm02' succeeded
+CRS-2677: Stop of 'ora.asm' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.cluster_interconnect.haip' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.cluster_interconnect.haip' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.cssd' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.cssd' on 'qr01dbadm01' succeeded
+CRS-2673: Attempting to stop 'ora.diskmon' on 'qr01dbadm01'
+CRS-2677: Stop of 'ora.diskmon' on 'qr01dbadm01' succeeded
+[root@qr01dbadm01 grid]# 
+
+Exit root
+
+login to cell 1 and run create key under cellcli
+
+
+[celladmin@qr01celadm01 ~]$ cellcli
+CellCLI: Release 12.1.2.1.0 - Production on Thu May 02 01:59:29 UTC 2019
+
+Copyright (c) 2007, 2013, Oracle.  All rights reserved.
+Cell Efficiency Ratio: 722
+
+CellCLI> create key
+	fb14bc083cfec6efcd096bd3bdf92371
+CellCLI> exit
+quitting
+
+[celladmin@qr01celadm01 ~]$ 
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e assign key for +ASM=\'fb14bc083cfec6efcd096bd3bdf92371\'"
+
+[celladmin@qr01celadm01 ~]$ dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e assign key for +ASM=\'fb14bc083cfec6efcd096bd3bdf92371\'"
+qr01celadm01: Key for +ASM successfully created
+qr01celadm02: Key for +ASM successfully created
+qr01celadm03: Key for +ASM successfully created
+[celladmin@qr01celadm01 ~]$ 
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e alter griddisk all availableTo=\'+ASM\'"
+
+[celladmin@qr01celadm01 ~]$ dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e alter griddisk all availableTo=\'+ASM\'"
+qr01celadm01: GridDisk DATA2_QR01_CD_00_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_01_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_02_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_03_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_04_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_05_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_06_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_07_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_08_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_09_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_10_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA2_QR01_CD_11_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_00_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_01_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_02_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_03_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_04_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_05_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_06_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_07_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_08_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_09_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_10_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DATA_QR01_CD_11_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_00_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_01_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_02_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_03_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_04_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_05_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_06_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_07_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_08_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_09_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_10_qr01celadm01 successfully altered
+qr01celadm01: GridDisk DBFS_DG_CD_11_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_00_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_01_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_02_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_03_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_04_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_05_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_06_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_07_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_08_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_09_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_10_qr01celadm01 successfully altered
+qr01celadm01: GridDisk RECO_QR01_CD_11_qr01celadm01 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_00_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_01_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_02_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_03_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_04_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_05_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_06_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_07_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_08_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_09_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_10_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA2_QR01_CD_11_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_00_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_01_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_02_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_03_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_04_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_05_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_06_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_07_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_08_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_09_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_10_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DATA_QR01_CD_11_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_00_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_01_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_02_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_03_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_04_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_05_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_06_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_07_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_08_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_09_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_10_qr01celadm02 successfully altered
+qr01celadm02: GridDisk DBFS_DG_CD_11_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_00_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_01_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_02_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_03_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_04_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_05_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_06_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_07_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_08_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_09_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_10_qr01celadm02 successfully altered
+qr01celadm02: GridDisk RECO_QR01_CD_11_qr01celadm02 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_00_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_01_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_02_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_03_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_04_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_05_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_06_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_07_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_08_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_09_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_10_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA2_QR01_CD_11_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_00_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_01_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_02_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_03_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_04_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_05_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_06_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_07_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_08_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_09_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_10_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DATA_QR01_CD_11_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_00_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_01_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_02_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_03_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_04_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_05_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_06_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_07_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_08_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_09_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_10_qr01celadm03 successfully altered
+qr01celadm03: GridDisk DBFS_DG_CD_11_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_00_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_01_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_02_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_03_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_04_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_05_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_06_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_07_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_08_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_09_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_10_qr01celadm03 successfully altered
+qr01celadm03: GridDisk RECO_QR01_CD_11_qr01celadm03 successfully altered
+[celladmin@qr01celadm01 ~]$ 
+
+The above command will change 144 disk's feature 144 because 108+36
+
+Swich to grid user on db1 host
+
+cd /etc/oracle/cell/network-config
+
+cat << END > cellkey.ora
+key=fb14bc083cfec6efcd096bd3bdf92371
+asm=+ASM
+END
+
+[grid@qr01dbadm01 network-config]$ cat << END > cellkey.ora
+> key=fb14bc083cfec6efcd096bd3bdf92371
+> asm=+ASM
+> END
+[grid@qr01dbadm01 network-config]$ 
+[grid@qr01dbadm01 network-config]$ cat cellkey.ora
+key=fb14bc083cfec6efcd096bd3bdf92371
+asm=+ASM
+[grid@qr01dbadm01 network-config]$ 
+
+After file created run following command to change ownership and priv
+
+chown grid.asmadmin cellkey.ora
+chmod 640 cellkey.ora
+ls -l cellkey.ora
+
+Then copy the cellkey file to all other DB hosts in the cluster
+
+scp cellkey.ora qr01dbadm02:/etc/oracle/cell/network-config
+
+After key is copied to everyhost, su to root and run crsctl start to startup everything
+
+su 
+
+as root
+
+crsctl start cluster -all
+
+crsctl stat res -w "TARGET = ONLINE" -t
+
+[root@qr01dbadm01 network-config]# crsctl start cluster -all
+CRS-2672: Attempting to start 'ora.evmd' on 'qr01dbadm02'
+CRS-2672: Attempting to start 'ora.cssdmonitor' on 'qr01dbadm01'
+CRS-2672: Attempting to start 'ora.cssdmonitor' on 'qr01dbadm02'
+CRS-2672: Attempting to start 'ora.evmd' on 'qr01dbadm01'
+CRS-2676: Start of 'ora.cssdmonitor' on 'qr01dbadm01' succeeded
+CRS-2672: Attempting to start 'ora.cssd' on 'qr01dbadm01'
+CRS-2672: Attempting to start 'ora.diskmon' on 'qr01dbadm01'
+CRS-2676: Start of 'ora.cssdmonitor' on 'qr01dbadm02' succeeded
+CRS-2672: Attempting to start 'ora.cssd' on 'qr01dbadm02'
+CRS-2672: Attempting to start 'ora.diskmon' on 'qr01dbadm02'
+CRS-2676: Start of 'ora.evmd' on 'qr01dbadm01' succeeded
+CRS-2676: Start of 'ora.evmd' on 'qr01dbadm02' succeeded
+CRS-2676: Start of 'ora.diskmon' on 'qr01dbadm01' succeeded
+CRS-2676: Start of 'ora.diskmon' on 'qr01dbadm02' succeeded
+CRS-2676: Start of 'ora.cssd' on 'qr01dbadm01' succeeded
+CRS-2672: Attempting to start 'ora.ctssd' on 'qr01dbadm01'
+CRS-2676: Start of 'ora.cssd' on 'qr01dbadm02' succeeded
+CRS-2672: Attempting to start 'ora.ctssd' on 'qr01dbadm02'
+CRS-2672: Attempting to start 'ora.cluster_interconnect.haip' on 'qr01dbadm01'
+CRS-2672: Attempting to start 'ora.cluster_interconnect.haip' on 'qr01dbadm02'
+CRS-2676: Start of 'ora.ctssd' on 'qr01dbadm02' succeeded
+CRS-2676: Start of 'ora.ctssd' on 'qr01dbadm01' succeeded
+CRS-2676: Start of 'ora.cluster_interconnect.haip' on 'qr01dbadm02' succeeded
+CRS-2672: Attempting to start 'ora.asm' on 'qr01dbadm02'
+CRS-2676: Start of 'ora.cluster_interconnect.haip' on 'qr01dbadm01' succeeded
+CRS-2672: Attempting to start 'ora.asm' on 'qr01dbadm01'
+CRS-2676: Start of 'ora.asm' on 'qr01dbadm02' succeeded
+CRS-2672: Attempting to start 'ora.storage' on 'qr01dbadm02'
+CRS-2676: Start of 'ora.storage' on 'qr01dbadm02' succeeded
+CRS-2672: Attempting to start 'ora.crsd' on 'qr01dbadm02'
+CRS-2676: Start of 'ora.crsd' on 'qr01dbadm02' succeeded
+CRS-2676: Start of 'ora.asm' on 'qr01dbadm01' succeeded
+CRS-2672: Attempting to start 'ora.storage' on 'qr01dbadm01'
+CRS-2676: Start of 'ora.storage' on 'qr01dbadm01' succeeded
+CRS-2672: Attempting to start 'ora.crsd' on 'qr01dbadm01'
+CRS-2676: Start of 'ora.crsd' on 'qr01dbadm01' succeeded
+[root@qr01dbadm01 network-config]# crsctl stat res -w "TARGET = ONLINE" -t
+--------------------------------------------------------------------------------
+Name           Target  State        Server                   State details       
+--------------------------------------------------------------------------------
+Local Resources
+--------------------------------------------------------------------------------
+ora.DATA_QR01.dg
+               ONLINE  ONLINE       qr01dbadm01              STABLE
+               ONLINE  ONLINE       qr01dbadm02              STABLE
+ora.DBFS_DG.dg
+               ONLINE  ONLINE       qr01dbadm01              STABLE
+               ONLINE  ONLINE       qr01dbadm02              STABLE
+ora.LISTENER.lsnr
+               ONLINE  ONLINE       qr01dbadm01              STABLE
+               ONLINE  ONLINE       qr01dbadm02              STABLE
+ora.RECO_QR01.dg
+               ONLINE  ONLINE       qr01dbadm01              STABLE
+               ONLINE  ONLINE       qr01dbadm02              STABLE
+ora.asm
+               ONLINE  ONLINE       qr01dbadm01              Started,STABLE
+               ONLINE  ONLINE       qr01dbadm02              Started,STABLE
+ora.net1.network
+               ONLINE  ONLINE       qr01dbadm01              STABLE
+               ONLINE  ONLINE       qr01dbadm02              STABLE
+ora.ons
+               ONLINE  ONLINE       qr01dbadm01              STABLE
+               ONLINE  ONLINE       qr01dbadm02              STABLE
+--------------------------------------------------------------------------------
+Cluster Resources
+--------------------------------------------------------------------------------
+ora.LISTENER_SCAN1.lsnr
+      1        ONLINE  ONLINE       qr01dbadm01              STABLE
+ora.LISTENER_SCAN2.lsnr
+      1        ONLINE  ONLINE       qr01dbadm01              STABLE
+ora.LISTENER_SCAN3.lsnr
+      1        ONLINE  ONLINE       qr01dbadm01              STABLE
+ora.cvu
+      1        ONLINE  ONLINE       qr01dbadm02              STABLE
+ora.dbm.db
+      1        ONLINE  OFFLINE      qr01dbadm01              Instance Shutdown,ST
+                                                             ARTING
+      2        ONLINE  OFFLINE      qr01dbadm02              Instance Shutdown,ST
+                                                             ARTING
+ora.oc4j
+      1        ONLINE  ONLINE       qr01dbadm02              STABLE
+ora.qr01dbadm01.vip
+      1        ONLINE  ONLINE       qr01dbadm01              STABLE
+ora.qr01dbadm02.vip
+      1        ONLINE  ONLINE       qr01dbadm02              STABLE
+ora.scan1.vip
+      1        ONLINE  ONLINE       qr01dbadm01              STABLE
+ora.scan2.vip
+      1        ONLINE  ONLINE       qr01dbadm01              STABLE
+ora.scan3.vip
+      1        ONLINE  ONLINE       qr01dbadm01              STABLE
+--------------------------------------------------------------------------------
+[root@qr01dbadm01 network-config]# 
+
+
+Second run of stat command show up stable for everything
+
+Exit root and switch to grid user's terminal
+
+Following 3 commands are successfully executed as create and drop diskgroup action
+
+create diskgroup data2_qr01_asm_sec normal redundancy
+disk 'o/*/DATA2_QR01*'
+attribute 'compatible.rdbms' = '12.1.0.2.0',
+'compatible.asm' = '12.1.0.2.0',
+'cell.smart_scan_capable' = 'TRUE',
+'au_size' = '4M';
+
+
+drop diskgroup data2_qr01_asm_sec;
+
+exit;
+
+Go to cell1 and create a new key
+
+[celladmin@qr01celadm01 ~]$ cellcli
+CellCLI: Release 12.1.2.1.0 - Production on Thu May 02 02:27:03 UTC 2019
+
+Copyright (c) 2007, 2013, Oracle.  All rights reserved.
+Cell Efficiency Ratio: 722
+
+CellCLI> create key
+	b0e6c73e27dbe43c6732fc0a83587808
+CellCLI> exit
+quitting
+
+[celladmin@qr01celadm01 ~]
+
+Still under cell 1  host: assign key to +ASM2
+
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e assign key for +ASM2=\'b0e6c73e27dbe43c6732fc0a83587808\'"
+
+[celladmin@qr01celadm01 ~]$ dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e assign key for +ASM2=\'b0e6c73e27dbe43c6732fc0a83587808\'"
+qr01celadm01: Key for +ASM2 successfully created
+qr01celadm02: Key for +ASM2 successfully created
+qr01celadm03: Key for +ASM2 successfully created
+[celladmin@qr01celadm01 ~]$ 
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e list key"
+
+[celladmin@qr01celadm01 ~]$ dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e list key"
+qr01celadm01: +ASM 	 fb14bc083cfec6efcd096bd3bdf92371
+qr01celadm01: +ASM2	 b0e6c73e27dbe43c6732fc0a83587808
+qr01celadm02: +ASM 	 fb14bc083cfec6efcd096bd3bdf92371
+qr01celadm02: +ASM2	 b0e6c73e27dbe43c6732fc0a83587808
+qr01celadm03: +ASM 	 fb14bc083cfec6efcd096bd3bdf92371
+qr01celadm03: +ASM2	 b0e6c73e27dbe43c6732fc0a83587808
+[celladmin@qr01celadm01 ~]
+
+This part is super confusion, +ASM instance do not exist, +ASM2 is on DB host 2, is +ASM addressing every grid host?
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e drop griddisk all prefix=DATA2_QR01"
+
+[celladmin@qr01celadm01 ~]$ dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e drop griddisk all prefix=DATA2_QR01"
+qr01celadm01: GridDisk DATA2_QR01_CD_00_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_01_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_02_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_03_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_04_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_05_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_06_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_07_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_08_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_09_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_10_qr01celadm01 successfully dropped
+qr01celadm01: GridDisk DATA2_QR01_CD_11_qr01celadm01 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_00_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_01_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_02_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_03_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_04_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_05_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_06_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_07_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_08_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_09_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_10_qr01celadm02 successfully dropped
+qr01celadm02: GridDisk DATA2_QR01_CD_11_qr01celadm02 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_00_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_01_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_02_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_03_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_04_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_05_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_06_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_07_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_08_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_09_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_10_qr01celadm03 successfully dropped
+qr01celadm03: GridDisk DATA2_QR01_CD_11_qr01celadm03 successfully dropped
+[celladmin@qr01celadm01 ~]$ 
+
+36 disks are dropped
+
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e create griddisk all harddisk prefix=DATA2_QR01, availableTo=\'+ASM2\'"
+
+[celladmin@qr01celadm01 ~]$ dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e create griddisk all harddisk prefix=DATA2_QR01, availableTo=\'+ASM2\'"
+qr01celadm01: GridDisk DATA2_QR01_CD_00_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_01_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_02_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_03_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_04_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_05_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_06_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_07_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_08_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_09_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_10_qr01celadm01 successfully created
+qr01celadm01: GridDisk DATA2_QR01_CD_11_qr01celadm01 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_00_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_01_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_02_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_03_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_04_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_05_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_06_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_07_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_08_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_09_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_10_qr01celadm02 successfully created
+qr01celadm02: GridDisk DATA2_QR01_CD_11_qr01celadm02 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_00_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_01_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_02_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_03_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_04_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_05_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_06_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_07_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_08_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_09_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_10_qr01celadm03 successfully created
+qr01celadm03: GridDisk DATA2_QR01_CD_11_qr01celadm03 successfully created
+[celladmin@qr01celadm01 ~]$ 
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e list griddisk attributes name, availableTo"
+
+Out of 144 drives only the 36 later created one are availale to +ASM2, others goes to +ASM
+
+Step 31 
+
+Go to grid user ASM and login sqlplus as sysasm run following diskgroup creation again it fails
+
+create diskgroup data2_qr01_asm_sec normal redundancy
+disk 'o/*/DATA2_QR01*'
+attribute 'compatible.rdbms' = '12.1.0.2.0',
+'compatible.asm' = '12.1.0.2.0',
+'cell.smart_scan_capable' = 'TRUE',
+'au_size' = '4M';
+
+SQL> create diskgroup data2_qr01_asm_sec normal redundancy
+disk 'o/*/DATA2_QR01*'
+attribute 'compatible.rdbms' = '12.1.0.2.0',
+'compatible.asm' = '12.1.0.2.0',
+'cell.smart_scan_capable' = 'TRUE',
+'au_size' = '4M';
+  2    3    4    5    6  create diskgroup data2_qr01_asm_sec normal redundancy
+*
+ERROR at line 1:
+ORA-15018: diskgroup cannot be created
+ORA-15031: disk specification 'o/*/DATA2_QR01*' matches no disks
+
+
+SQL> 
+SQL> 
+
+
+On ASM2+ host still fail, why?
+
+Connected to:
+Oracle Database 12c Enterprise Edition Release 12.1.0.2.0 - 64bit Production
+With the Real Application Clusters and Automatic Storage Management options
+
+SQL> create diskgroup data2_qr01_asm_sec normal redundancy
+disk 'o/*/DATA2_QR01*'
+attribute 'compatible.rdbms' = '12.1.0.2.0',
+'compatible.asm' = '12.1.0.2.0',
+'cell.smart_scan_capable' = 'TRUE',
+'au_size' = '4M';
+  2    3    4    5    6  create diskgroup data2_qr01_asm_sec normal redundancy
+*
+ERROR at line 1:
+ORA-15018: diskgroup cannot be created
+ORA-15031: disk specification 'o/*/DATA2_QR01*' matches no disks
+
+
+SQL> 
+
+
+
+select path from v$asm_disk where path like '%DATA2_QR01%';
+
+
+Switch to roacle user instead of grid user on db host 1 and check instance unique name
+
+
+. oraenv
+dbm
+export ORACLE_SID=dbm1
+sqlplus / as sysdba
+show parameter unique
+exit
+
+su
+
+/u01/app/12.1.0.2/grid/bin/crsctl stop cluster -all
+
+All service stopped across the whole cluster
+
+Go to cell 1 host and run create key
+
+[celladmin@qr01celadm01 ~]$ cellcli
+CellCLI: Release 12.1.2.1.0 - Production on Thu May 02 03:05:31 UTC 2019
+
+Copyright (c) 2007, 2013, Oracle.  All rights reserved.
+Cell Efficiency Ratio: 722
+
+CellCLI> create key
+	b678ebca4fb01a2b7384a08de81cb1d1
+CellCLI> exit
+quitting
+
+[celladmin@qr01celadm01 ~]$ 
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e assign key for dbm=\'b678ebca4fb01a2b7384a08de81cb1d1\'"
+
+[celladmin@qr01celadm01 ~]$ dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e assign key for dbm=\'b678ebca4fb01a2b7384a08de81cb1d1\'"
+qr01celadm01: Key for dbm successfully created
+qr01celadm02: Key for dbm successfully created
+qr01celadm03: Key for dbm successfully created
+[celladmin@qr01celadm01 ~]$ 
+
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e alter griddisk all availableTo=\'+ASM,dbm\'"
+
+Really long output, I guess it change property for all 144 drives.
+
+Switch DB1 servedr and 
+
+[oracle@qr01dbadm01 linux-x64]$ mkdir -p $ORACLE_HOME/admin/dbm/pfile
+[oracle@qr01dbadm01 linux-x64]$ cd $ORACLE_HOME/admin/dbm/pfile
+[oracle@qr01dbadm01 pfile]$ 
+
+
+
+cat << END > cellkey.ora
+key=b678ebca4fb01a2b7384a08de81cb1d1
+asm=+ASM
+END
+
+
+[oracle@qr01dbadm01 pfile]$ chmod 600 cellkey.ora
+[oracle@qr01dbadm01 pfile]$ ls -l cellkey.ora
+-rw------- 1 oracle oinstall 46 May  2 03:40 cellkey.ora
+[oracle@qr01dbadm01 pfile]$ 
+
+
+ssh qr01dbadm02 "mkdir -p /u01/app/oracle/product/12.1.0.2/dbhome_1/admin/dbm/pfile"
+scp cellkey.ora qr01dbadm02:/u01/app/oracle/product/12.1.0.2/dbhome_1/admin/dbm/pfile
+
+su 
+
+/u01/app/12.1.0.2/grid/bin/crsctl start cluster -all
+
+/u01/app/12.1.0.2/grid/bin/crsctl stat res -w "TARGET = ONLINE" -t
+
+Wait until everything is up and then exit root and 
+
+login as sh/sh check to following sql to make sure db is accessible
+
+select count(1) from customers;
+
+su  to root 
+and going clear all the key security we build in this session
+
+Run cluster shutdown from DB host 1
+
+/u01/app/12.1.0.2/grid/bin/crsctl stop cluster -all
+
+Switch to cell host 1
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e alter griddisk all availableTo=\'\'"
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e assign key for dbm=\'\'"
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e assign key for +ASM=\'\'"
+
+dcli -c qr01celadm01,qr01celadm02,qr01celadm03 "cellcli -e assign key for +ASM2=\'\'"
+
+All execuated as expected, first changes all 144 drives
+
+Second group removed all keys
+
+Change to root user on db host 1
+
+Run rm commands:
+
+rm -f /u01/app/oracle/product/12.1.0.2/dbhome_1/admin/dbm/pfile/cellkey.ora
+ssh qr01dbadm02 "rm -f /u01/app/oracle/product/12.1.0.2/dbhome_1/admin/dbm/pfile/cellkey.ora"
+ssh qr01dbadm02 "rm /u01/app/oracle/product/12.1.0.2/dbhome_1/admin/dbm/pfile/cellkey.ora"
+
+rm -f /etc/oracle/cell/network-config/cellkey.ora
+rm /etc/oracle/cell/network-config/cellkey.ora
+
+ssh -f qr01dbadm02 "rm -f /etc/oracle/cell/network-config/cellkey.ora"
+ssh -f qr01dbadm02 "rm /etc/oracle/cell/network-config/cellkey.ora"
+
+Finally start all
+
+/u01/app/12.1.0.2/grid/bin/crsctl start cluster -all
+
+Practice 6-5
+
+ssh cellmonitor@qr01celadm01
+
+cellcli 
+
+list cell detail
+
+alter cell smtpToAddr='admin@example.com'
+
+create celldisk all harddisk
+
+alter griddisk all comment="Here is a comment"
+
+Run as celladmin
+
+calibrate
+
+Practice 6-6
+
+Using oracle user at HOME diretory
+
+cat << END > mycells
+qr01celadm01
+qr01celadm02
+qr01celadm03
+END
+
+
+ssh key pair is the one in 
+
+~/.ssh/id_rsa*
+
+
+[oracle@qr01dbadm01 ~]$ dcli -g mycells -k
+celladmin@qr01celadm01's password: 
+celladmin@qr01celadm01's password: 
+oracelladmin@qr01celadm01's password: 
+qr01celadm01:Permission denied, please try again.
+
+qr01celadm01:Permission denied, please try again.
+
+qr01celadm01:Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password).
+
+celladmin@qr01celadm03's password: 
+celladmin@qr01celadm02's password: 
+qr01celadm02: ssh key added
+qr01celadm03: ssh key added
+[oracle@qr01dbadm01 ~]$ dcli -g mycells -k
+celladmin@qr01celadm01's password: 
+qr01celadm01: ssh key added
+qr01celadm02: ssh key already exists
+qr01celadm03: ssh key already exists
+[oracle@qr01dbadm01 ~]$ 
+
+
+Now able to run cell command from DB host and all commands return desired result as expected.
+
+dcli -g mycells cellcli -e list cell
+
+dcli -g mycells "cat /proc/meminfo | grep Mem"
+
+dcli -g mycells cellcli -e alter iormplan objective=auto
+
+dcli -g mycells cellcli -e list iormplan attributes objective
+
+dcli -g mycells cellcli -e alter iormplan objective=basic
+
+dcli -g mycells cellcli -e list iormplan attributes objective
+
+Expect long out put
+
+dcli -g mycells "cellcli -e list metriccurrent where name like \'CD_IO_RQ_W_S.?\' and metricobjectname like \'CD.*\'"
+
+Enough to cover a screen on IO from different disks
+
+-r Plus regular expression is to exclude the matching from the output
+
+dcli -g mycells -r '.*CD_0.*' "cellcli -e list metriccurrent where name like \'CD_IO_RQ_W_S.?\' and metricobjectname like \'CD.*\'"
+
+cat << END > message.txt
+Hello World!
+END
+
+
+dcli -g mycells -f message.txt
+dcli -g mycells cat message.txt
+
+cat << END > scripts.sh
+HST=\`hostname -s\`
+DTE=\`date\`
+echo -n \`cat message.txt\`
+echo " on \${HST} at \${DTE}."
+END
+
+chmod u+x scripts.sh
+
+dcli -g mycells -x scripts.sh
+
+dcli -g mycells rm -v message.txt scripts.sh
+
+[oracle@qr01dbadm01 ~]$ 
+[oracle@qr01dbadm01 ~]$ cat message.txt
+Hello World!
+[oracle@qr01dbadm01 ~]$ dcli -g mycells -f message.txt
+[oracle@qr01dbadm01 ~]$ dcli -g mycells cat message.txt
+qr01celadm01: Hello World!
+qr01celadm02: Hello World!
+qr01celadm03: Hello World!
+[oracle@qr01dbadm01 ~]$ cat << END > scripts.sh
+> HST=\`hostname -s\`
+> DTE=\`date\`
+> echo -n \`cat message.txt\`
+> echo " on \${HST} at \${DTE}."
+> END
+[oracle@qr01dbadm01 ~]$ 
+[oracle@qr01dbadm01 ~]$ echo scripts.sh
+scripts.sh
+[oracle@qr01dbadm01 ~]$ chmod u+x script.sh
+chmod: cannot access `script.sh': No such file or directory
+[oracle@qr01dbadm01 ~]$ ls -l
+total 20
+drwxr-xr-x 2 oracle oinstall 4096 Jul  1  2016 Desktop
+drwxr-xr-x 6 oracle oinstall 4096 Jun 21  2016 labs
+-rw-r--r-- 1 oracle oinstall   13 May  2 04:47 message.txt
+-rw-r--r-- 1 oracle oinstall   39 May  2 04:26 mycells
+-rw-r--r-- 1 oracle oinstall   84 May  2 04:54 scripts.sh
+[oracle@qr01dbadm01 ~]$ cat scripts.sh
+HST=`hostname -s`
+DTE=`date`
+echo -n `cat message.txt`
+echo " on ${HST} at ${DTE}."
+[oracle@qr01dbadm01 ~]$ chmod u+x scripts.sh
+[oracle@qr01dbadm01 ~]$ ./scripts.sh
+Hello World! on qr01dbadm01 at Thu May  2 04:55:33 UTC 2019.
+[oracle@qr01dbadm01 ~]$ dcli -g mycells -x scripts.sh
+qr01celadm01: Hello World! on qr01celadm01 at Thu May  2 04:56:27 UTC 2019.
+qr01celadm02: Hello World! on qr01celadm02 at Thu May  2 04:56:27 UTC 2019.
+qr01celadm03: Hello World! on qr01celadm03 at Thu May  2 04:56:27 UTC 2019.
+[oracle@qr01dbadm01 ~]$ dcli -g mycells rm -v message.txt scripts.sh
+qr01celadm01: removed `message.txt'
+qr01celadm01: removed `scripts.sh'
+qr01celadm02: removed `message.txt'
+qr01celadm02: removed `scripts.sh'
+qr01celadm03: removed `message.txt'
+qr01celadm03: removed `scripts.sh'
+[oracle@qr01dbadm01 ~]$ 
+
+

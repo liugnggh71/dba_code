@@ -1,0 +1,70 @@
+==cell host process explorer:==
+
+
+At cell Linux OS prompt:
+
+Find cell restart server:
+
+ps -ef | grep cellrs
+
+Find cell management and configuration server:
+
+ps -ef | grep ms.err | grep -v grep
+
+Find cellService
+
+ps -ef | grep  "/cellsrv "
+
+At OS command no need to get in find 3 key processes in one command:
+
+cellcli -e list cell detail  | tail -3``
+
+
+==Exadata high availability demo==
+
+Kill cellsrv still wrok:
+
+# cellcli -e alter cell restart services all
+
+Still working
+
+Check error history:
+
+cellcli -e list alerthistory
+
+== Storage object ==
+
+cellcli -e list lun
+
+cellcli -e list lun where disktype=harddisk
+
+cellcli -e list lun where name like '.*DISK09'  detail
+
+cellcli -e list physicaldisk where luns like '.*DISK09' DEAIL
+
+cellcli -e list celldisk CD_09_qr01cel01 detail 
+
+cellcli -e list griddisk where celldisk=CD-09_qr01cel01 detail
+
+sqlplus / as sysasm
+
+
+select name, path, state, total_mb from v$asm_disk where name like '%_CD_09_qr01cel01';
+
+
+SELECT d.name disk, dg.namd diskgroup from 
+v$asm_disk d, v$asm_diskgroup dg where db.group_number=d.group_number
+and d.name like '$%_CD_09_QR01CEL01';
+
+== flashcashe  ==
+
+list celldisk where disktype=flashdisk
+
+list flashcache detail
+
+list flashlog detail
+
+list flashcachecontent detail
+
+
+
