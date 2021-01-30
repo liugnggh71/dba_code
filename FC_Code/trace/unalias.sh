@@ -1,0 +1,9 @@
+unalias S
+unalias DE
+unalias DD
+unalias TMP
+unalias U2
+unalias snap
+unalias sash
+unalias H
+unalias U

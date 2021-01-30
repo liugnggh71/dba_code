@@ -1,0 +1,33 @@
+ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS';
+COLUMN PDB_NAME FORMAT a30
+COLUMN DB_NAME FORMAT a30
+SET LINESIZE 150 PAGESIZE 50
+SET ECHO ON
+
+
+  SELECT p.name,
+         P.OPEN_MODE,
+         P.OPEN_TIME,
+         MAX (D.CREATION_TIME)     creation_date
+    FROM v$pdbs P, v$datafile D
+   WHERE P.CON_ID = D.CON_ID
+GROUP BY P.NAME,P.OPEN_MODE,P.OPEN_TIME
+ORDER BY NAME;
+
+  SELECT p.name, MAX (D.CREATION_TIME) creation_date
+    FROM v$pdbs P, v$datafile D
+   WHERE P.CON_ID = D.CON_ID
+GROUP BY P.NAME
+ORDER BY CREATION_DATE DESC;
+
+SELECT *
+  FROM (  SELECT DB_NAME,
+                 CON_ID,
+                 PDB_NAME,
+                 OPERATION,
+                 OP_TIMESTAMP,
+                 CLONED_FROM_PDB_NAME
+            FROM CDB_PDB_HISTORY A
+        ORDER BY A.OP_TIMESTAMP DESC)
+ WHERE ROWNUM < 10;
+

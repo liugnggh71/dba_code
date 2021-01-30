@@ -1,0 +1,11 @@
+if [ $# -lt 1 ]
+then
+ echo " "
+ echo "USAGE: b1f file_name"
+ echo " "
+ exit 1
+fi
+mkdir -p bck_1
+cp -p ${1} bck_1/${1}.$(date +%m_%d_%Y_%H_%M_%S)
+ls -ltr bck_1 | tail -n 10
+
