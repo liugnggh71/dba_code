@@ -1,0 +1,1 @@
+dbaascli tde status
