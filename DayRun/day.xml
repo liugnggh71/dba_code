@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="day.xsl"?>
+
+<day>
+    <atos>
+        <emails>
+            <email type="Exa downtime">https://savvytime.com/converter/utc-to-cst/jan-31-2021/12am</email>
+            <email type="boss"></email>
+            <email type="backup"></email>
+            <email type="FC">Backup, standby lagging space</email>
+            <email type="PS">Backup, standby lagging space</email>
+            <email type="oem"></email>
+        </emails>
+        <tickets>
+            <ticket vendor="BSW"></ticket>
+            <ticket vendor="Oracle"></ticket>
+        </tickets>
+        <projects>
+            <project name="FC EXA Upgrade"></project>
+            <project name="PS fail over"></project>
+        </projects>
+    </atos>
+    <math>
+        <books></books>
+        <problems></problems>
+    </math>
+</day>
