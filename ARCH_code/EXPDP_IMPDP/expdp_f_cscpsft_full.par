@@ -1,0 +1,11 @@
+# expdp_f_cscpsft_full.par
+USERID='SYS/Ora_cle1@cmparch:1521/CSC_PSFT as sysdba'
+DUMPFILE="cscpsft_full_%U.dmp"
+LOGFILE="expdp_f_cscpsft_full.log"
+DIRECTORY=MY_DATA_PUMP_DIR
+JOB_NAME='cscpsft_full'
+COMPRESSION=ALL
+PARALLEL=10
+CONTENT=ALL
+FULL=Y
+

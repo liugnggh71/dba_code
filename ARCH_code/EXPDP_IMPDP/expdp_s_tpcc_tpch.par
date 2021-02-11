@@ -1,0 +1,10 @@
+# expdp_s_tpcc_tpch.par
+USERID="SYS/Ora_cle1@Rheltestoraclex86:1521/redhat.bhcs.pvt as sysdba"
+DUMPFILE="tpcc_tpch_%U.dmp"                        
+LOGFILE="expdp_s_tpcc_tpch.log"                         
+DIRECTORY=MY_DATA_PUMP_DIR                             
+JOB_NAME='ES_exp_tpcc_tpch'                           
+PARALLEL=10
+CONTENT=ALL                                         
+SCHEMAS=TPCC,TPCH
+     

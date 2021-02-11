@@ -1,0 +1,10 @@
+USERID='SYS/pzUr6B?VMxv2P4@cmparch:1521/cpo as sysdba'
+DUMPFILE="cpo_full_%U.dmp"
+LOGFILE="expdp_f_cpo_full.log"
+DIRECTORY=MY_DATA_PUMP_DIR
+JOB_NAME='cpo_full'
+COMPRESSION=ALL
+PARALLEL=10
+CONTENT=ALL
+FULL=Y
+

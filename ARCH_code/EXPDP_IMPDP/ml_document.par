@@ -1,0 +1,7 @@
+USERID="SYS/CHubecH4@cmparch:1521/cpoemr as sysdba"
+FILE="ml_document.dmp"
+LOG="exp_t_ml_document.log"
+TABLES=(ml.document)
+COMPRESS=N
+FEEDBACK=100000
+

@@ -1,0 +1,10 @@
+USERID='SYS/Ora_cle1@cmparch:1521/dbadmin as sysdba'
+DUMPFILE="dbadmin_full_%U.dmp"
+LOGFILE="expdp_f_dbadmin_full.log"
+DIRECTORY=MY_DATA_PUMP_DIR
+JOB_NAME='dbadmin_full'
+COMPRESSION=ALL
+PARALLEL=10
+CONTENT=ALL
+FULL=Y
+

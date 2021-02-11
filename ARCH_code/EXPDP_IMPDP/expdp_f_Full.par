@@ -1,0 +1,11 @@
+USERID='SYS/edwora001@cmparch:1521/cogprod as sysdba'
+DUMPFILE="Full_%U.dmp"
+LOGFILE="expdp_f_Full.log"
+DIRECTORY=MY_DATA_PUMP_DIR
+JOB_NAME='cogprod'
+COMPRESSION=ALL
+PARALLEL=10
+CONTENT=ALL
+FULL=Y
+REUSE_DUMPFILES=Y
+
